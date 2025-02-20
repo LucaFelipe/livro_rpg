@@ -1,0 +1,176 @@
+package rpg.montanha_de_fogo.personagem;
+
+import rpg.montanha_de_fogo.inventario.Inventario;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Random;
+import java.util.Scanner;
+
+public class Personagem implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private final String nome;
+    private int habilidade;
+    private final int habilidadeMaxima;
+    private int energia;
+    private final int energiaMaxima;
+    private int sorte;
+    private final int sorteMaxima;
+    private int provisoes;
+    private final Inventario inventario;
+    private String armaEquipada = null;
+    private String armaduraEquipada = null;
+    private static final Random rand = new Random();
+
+    public Personagem(String nome) {
+        this.nome = nome;
+        this.habilidade = this.habilidadeMaxima = rand.nextInt(1, 6) + 6;
+        this.energia = this.energiaMaxima = rand.nextInt(1,6) + rand.nextInt(1, 6) + 12;
+        this.sorte = this.sorteMaxima = rand.nextInt(1,6) + 6;
+        this.provisoes = 10;
+        this.inventario = new Inventario();
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public Inventario getInventario() {
+        return inventario;
+    }
+
+    public void exibirEstatisticas() {
+        System.out.println("\nNome: " + nome +
+                "\nHabilidade: " + habilidade + "/" + habilidadeMaxima +
+                "\nEnergia: " + energia + "/" + energiaMaxima +
+                "\nSorte: " + sorte + "/" + sorteMaxima +
+                "\nProvisões: " + provisoes);
+        listarEquipamentos();
+        inventario.listarMochila();
+        inventario.listarPocoes();
+    }
+
+    public void listarEquipamentos() {
+        System.out.println("Equipamentos Equipados:");
+        System.out.println("Arma: " + (armaEquipada != null ? armaEquipada : "Nenhuma"));
+        System.out.println("Armadura: " + (armaduraEquipada != null ? armaduraEquipada : "Nenhuma"));
+    }
+
+    public void comer() {
+        if (provisoes > 0) {
+            provisoes--;
+            restaurarHabilidade();
+            restaurarEnergia();
+            aumentarSorte();
+            System.out.println(nome + " comeu uma provisão e restaurou todos os status.");
+        } else {
+            System.out.println(nome + " não tem provisões disponíveis.");
+        }
+    }
+
+    public void ganharProvisao() {
+        provisoes++;
+        System.out.println(nome + " ganhou uma provisão! Total de provisões: " + provisoes);
+    }
+
+    public void equipar(String nomeItem) {
+        if (!inventario.temNaMochila(nomeItem)) {
+            System.out.println("Esse item não está na mochila!");
+            return;
+        }
+
+        String tipo = inventario.obterTipoItem(nomeItem);
+        if (tipo == null) {
+            System.out.println("Tipo de equipamento desconhecido.");
+            return;
+        }
+
+        if (tipo.equals("arma")) {
+            if (armaEquipada != null) {
+                System.out.println("Você já tem uma arma equipada! Deseja substituir " + armaEquipada + "? (s/n)");
+                if (confirmarAcao()) return;
+                guardarNaMochila(armaEquipada);
+            }
+            armaEquipada = nomeItem;
+        } else if (tipo.equals("armadura")) {
+            if (armaduraEquipada != null) {
+                System.out.println("Você já tem uma armadura equipada! Deseja substituir " + armaduraEquipada + "? (s/n)");
+                if (confirmarAcao()) return;
+                guardarNaMochila(armaduraEquipada);
+            }
+            armaduraEquipada = nomeItem;
+        } else {
+            System.out.println("Tipo de equipamento inválido.");
+            return;
+        }
+
+        inventario.removerDaMochila(nomeItem);
+        System.out.println(nomeItem + " equipado com sucesso!");
+    }
+
+    public void guardarNaMochila(String nomeItem) {
+        if (nomeItem.equals(armaEquipada)) {
+            armaEquipada = null;
+        } else if (nomeItem.equals(armaduraEquipada)) {
+            armaduraEquipada = null;
+        } else {
+            System.out.println("Esse item não está equipado!");
+            return;
+        }
+        inventario.adicionarNaMochila(nomeItem, "equipamento", 0, "mochila");
+        System.out.println(nomeItem + " guardado na mochila.");
+    }
+
+    public void usarPocao(String tipo) {
+        inventario.usarPocao(tipo, this);
+    }
+
+    private boolean confirmarAcao() {
+        Scanner scanner = new Scanner(System.in);
+        String resposta = scanner.nextLine().trim().toLowerCase();
+        return !resposta.equals("s");
+    }
+
+    public void restaurarHabilidade() {
+        habilidade = habilidadeMaxima;
+    }
+
+    public void restaurarEnergia() {
+        energia = energiaMaxima;
+    }
+
+    public void aumentarSorte() {
+        sorte = sorteMaxima + 1;
+    }
+
+    public boolean estaVivo() {
+        return energia > 0;
+    }
+
+    public int atacar(boolean usarSorte) {
+        int ataque = habilidade + (rand.nextInt(6) + 1) + (rand.nextInt(6) + 1);
+        if (usarSorte && testarSorte()) {
+            ataque += 2;
+        }
+        System.out.println(nome + " ataca com " + ataque + " de força!");
+        return ataque;
+    }
+
+    public boolean testarSorte() {
+        int resultado = (rand.nextInt(6) + 1) + (rand.nextInt(6) + 1);
+        boolean sucesso = resultado <= sorte;
+        reduzirSorte();
+        return sucesso;
+    }
+
+    public void reduzirSorte() {
+        sorte = Math.max(0, sorte - 1);
+    }
+
+    public void receberDano(int danoRecebido) {
+        energia = Math.max(0, energia - danoRecebido);
+        System.out.println(nome + " recebeu " + danoRecebido + " de dano. Energia restante: " + energia);
+    }
+}
