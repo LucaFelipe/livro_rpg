@@ -1,7 +1,5 @@
 package rpg.montanha_de_fogo.inventario;
 
-import rpg.montanha_de_fogo.personagem.Personagem;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -10,23 +8,17 @@ import java.util.Map;
 public class Inventario implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private final Map<String, Item> mochila;
-    private final Map<String, Pocao> pocoes;
 
-    public Inventario() {
-        mochila = new HashMap<>();
-        pocoes = new HashMap<>();
-    }
+    private final Map<String, Item> mochila = new HashMap<>();
+    private final Map<String, Pocao> pocoes = new HashMap<>();
 
     public void adicionarNaMochila(String nome, String tipo, int poder, String local) {
-        Item item = new Item(nome, tipo, poder, local);
-        mochila.put(nome, item);
+        mochila.put(nome, new Item(nome, tipo, poder, local));
         System.out.println(nome + " foi adicionado à mochila.");
     }
 
     public void removerDaMochila(String nome) {
-        if (mochila.containsKey(nome)) {
-            mochila.remove(nome);
+        if (mochila.remove(nome) != null) {
             System.out.println(nome + " foi removido da mochila.");
         } else {
             System.out.println("O item " + nome + " não está na mochila.");
@@ -38,46 +30,26 @@ public class Inventario implements Serializable {
     }
 
     public String obterTipoItem(String nome) {
-        if (mochila.containsKey(nome)) {
-            return mochila.get(nome).tipo();
-        } else {
-            return null;
-        }
+        return mochila.getOrDefault(nome, new Item("", "", 0, "")).tipo();
+    }
+
+    public int obterPoderItem(String nome) {
+        return mochila.getOrDefault(nome, new Item("", "", 0, "")).poder();
     }
 
     public void adicionarPocao(String tipo) {
-        if (pocoes.containsKey(tipo)) {
-            pocoes.get(tipo).aumentarDose();
-        } else {
-            pocoes.put(tipo, new Pocao(tipo));
-        }
+        pocoes.computeIfAbsent(tipo, Pocao::new).aumentarDose();
         System.out.println("Poção de " + tipo + " adicionada ao inventário.");
     }
-
-    public void usarPocao(String tipo, Personagem personagem) {
-        if (pocoes.containsKey(tipo)) {
-            Pocao pocao = pocoes.get(tipo);
-            pocao.usarPocao(personagem);
-
-            // Verificar se a poção ainda tem doses
-            if (pocao.getDoses() == 0) {
-                pocoes.remove(tipo);
-                System.out.println("Poção de " + tipo + " foi completamente usada e removida do inventário.");
-            }
-        } else {
-            System.out.println("Você não possui uma poção de " + tipo + "!");
-        }
-    }
-
 
     public void listarMochila() {
         System.out.println("\nItens na mochila:");
         if (mochila.isEmpty()) {
             System.out.println("A mochila está vazia.");
         } else {
-            for (Item item : mochila.values()) {
-                System.out.println(item.nome() + " (Poder: " + item.poder() + ")");
-            }
+            mochila.values().forEach(item ->
+                    System.out.println(item.nome() + " (Poder: " + item.poder() + ")")
+            );
         }
     }
 
@@ -86,14 +58,17 @@ public class Inventario implements Serializable {
         if (pocoes.isEmpty()) {
             System.out.println("Não há poções no inventário.");
         } else {
-            for (Map.Entry<String, Pocao> entry : pocoes.entrySet()) {
-                System.out.println("Poção de " + entry.getKey() + " (Doses: " + entry.getValue().getDoses() + ")");
-            }
+            pocoes.forEach((tipo, pocao) ->
+                    System.out.println("Poção de " + tipo + " (Doses: " + pocao.getDoses() + ")")
+            );
         }
     }
 
     public Pocao getPocao(String tipo) {
-        return pocoes.get(tipo);  // Retorna a poção do tipo especificado, ou null se não existir
+        return pocoes.get(tipo);
     }
 
+    public boolean temPocao(String tipo) {
+        return pocoes.containsKey(tipo);
+    }
 }

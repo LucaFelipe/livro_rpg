@@ -39,15 +39,14 @@ public class Pocao implements Serializable {
         System.out.println("Poção de " + tipo + " usada com sucesso!");
     }
 
-    public boolean usarPocao(Personagem personagem) {
+    public void usarPocao(Personagem personagem) {
         if (dose > 0) {
             aplicarEfeito(personagem);
             dose--;
             System.out.println("Restam " + dose + " dose(s) de poção de " + tipo + ".");
-            return true;
+            return;
         }
         System.out.println("Não há doses restantes da poção de " + tipo + ".");
-        return false;
     }
 
     public int getDoses() {
@@ -58,9 +57,10 @@ public class Pocao implements Serializable {
         this.dose++;
     }
 
-    public void diminuirDose() {
+    public boolean diminuirDose() {
         if (dose > 0) {
-            this.dose--;  // Garantir que a dose não ficará negativa
+            this.dose--;
         }
+        return dose == 0;
     }
 }

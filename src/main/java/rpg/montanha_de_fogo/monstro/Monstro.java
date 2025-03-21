@@ -7,32 +7,21 @@ import java.util.Random;
 public class Monstro implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    private String nome;
-    private int habilidade;
+
+
+    private final String nome;
+    private final int habilidade;
     private int energia;
     private static final int DANO_FIXO = 2;
+
+    public String getNome() {
+        return nome;
+    }
 
     public Monstro(String nome, int habilidade, int energia) {
         this.nome = nome;
         this.habilidade = habilidade;
         this.energia = energia;
-    }
-
-    // Métodos de acesso (getters)
-    public String getNome() {
-        return nome;
-    }
-
-    public int getHabilidade() {
-        return habilidade;
-    }
-
-    public int getEnergia() {
-        return energia;
-    }
-
-    public static int getDanoFixo() {
-        return DANO_FIXO;
     }
 
     // Método para o ataque do monstro
@@ -52,7 +41,7 @@ public class Monstro implements Serializable {
 
     // Verifica se o monstro ainda está vivo
     public boolean estaVivo() {
-        return energia > 0;
+        return energia <= 0;
     }
 
     // Exibe as estatísticas do monstro
@@ -62,5 +51,17 @@ public class Monstro implements Serializable {
         System.out.println("Habilidade: " + habilidade);
         System.out.println("Energia: " + energia);
         System.out.println("=======================\n");
+    }
+
+    public int getDano() {
+        return DANO_FIXO;
+    }
+
+    public void receberDano(int danoPersonagem) {
+        energia -= danoPersonagem;
+    }
+
+    public int getEnergia() {
+        return energia;
     }
 }

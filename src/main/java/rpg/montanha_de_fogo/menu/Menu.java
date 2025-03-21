@@ -1,5 +1,7 @@
 package rpg.montanha_de_fogo.menu;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import rpg.montanha_de_fogo.batalha.Batalha;
 import rpg.montanha_de_fogo.personagem.Personagem;
 import rpg.montanha_de_fogo.monstro.Monstro;
@@ -7,13 +9,14 @@ import rpg.montanha_de_fogo.inventario.Pocao;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class Menu implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final Scanner scanner = new Scanner(System.in);
-    private static Personagem personagem;
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    public static Personagem personagem;
 
     public static void menu() {
         while (true) {
@@ -35,13 +38,15 @@ public class Menu implements Serializable {
         System.out.println("4. Listar itens na mochila");
         System.out.println("5. Equipar equipamento");
         System.out.println("6. Guardar equipamento na mochila");
-        System.out.println("7. Ganhar provisão");
-        System.out.println("8. Comer provisão");
-        System.out.println("9. Usar poção");
-        System.out.println("10. Iniciar batalha");
-        System.out.println("11. Salvar o personagem");
-        System.out.println("12. Carregar o personagem");
-        System.out.println("13. Sair");
+        System.out.println("7. Guardar item diretamente na mochila");
+        System.out.println("8. Ganhar provisão");
+        System.out.println("9. Comer provisão");
+        System.out.println("10. Usar poção");
+        System.out.println("11. Iniciar batalha");
+        System.out.println("12. Salvar o personagem");
+        System.out.println("13. Carregar o personagem");
+        System.out.println("14. Diminuir dose da poção");
+        System.out.println("15. Sair");
     }
 
     private static String lerEntrada(String mensagem) {
@@ -51,23 +56,25 @@ public class Menu implements Serializable {
 
     private static boolean processarOpcao(String escolha) {
         switch (escolha) {
-            case "1": criarPersonagem(); break;
-            case "2": exibirEstatisticas(); break;
-            case "3": listarEquipamentos(); break;
-            case "4": listarItens(); break;
-            case "5": equiparItem(); break;
-            case "6": guardarItem(); break;
-            case "7": ganharProvisao(); break;
-            case "8": comerProvisao(); break;
-            case "9": usarPocao(); break;
-            case "10": iniciarBatalha(); break;
-            case "11": salvarPersonagem(); break;
-            case "12": carregarPersonagem(); break;
-            case "13":
+            case "1" -> criarPersonagem();
+            case "2" -> exibirEstatisticas();
+            case "3" -> listarEquipamentos();
+            case "4" -> listarItens();
+            case "5" -> equiparItem();
+            case "6" -> guardarItem();
+            case "7" -> guardarNaMochilaDiretamente();
+            case "8" -> ganharProvisao();
+            case "9" -> comerProvisao();
+            case "10" -> usarPocao();
+            case "11" -> iniciarBatalha();
+            case "12" -> salvarPersonagem();
+            case "13" -> carregarPersonagem();
+            case "14" -> diminuirDosePocao();
+            case "15" -> {
                 System.out.println("Saindo do jogo...");
                 return false;
-            default:
-                System.out.println("Opção inválida.");
+            }
+            default -> System.out.println("Opção inválida.");
         }
         return true;
     }
@@ -100,7 +107,7 @@ public class Menu implements Serializable {
         }
     }
 
-    private static Pocao criarPocaoEscolhida(String escolha) {
+    static Pocao criarPocaoEscolhida(String escolha) {
         return switch (escolha) {
             case "1" -> new Pocao("habilidade");
             case "2" -> new Pocao("energia");
@@ -112,16 +119,73 @@ public class Menu implements Serializable {
         };
     }
 
-    private static void exibirEstatisticas() {
+    public static void usarPocao() {
         if (verificarPersonagem()) {
-            personagem.exibirEstatisticas();
+            String tipo = lerEntrada("Digite o tipo da poção (habilidade, vigor, fortuna): ").trim().toLowerCase();
+            if (!tipo.equals("habilidade") && !tipo.equals("vigor") && !tipo.equals("fortuna")) {
+                System.out.println("Tipo de poção inválido!");
+                return;
+            }
+            Pocao pocao = personagem.getInventario().getPocao(tipo);
+            if (pocao != null) {
+                pocao.usarPocao(personagem);
+            } else {
+                System.out.println("Você não possui uma poção de " + tipo + ".");
+            }
         }
     }
 
-    private static void listarEquipamentos() {
+    private static void iniciarBatalha() {
         if (verificarPersonagem()) {
-            personagem.listarEquipamentos();
+            try {
+                String nome = lerEntrada("Digite o nome do monstro: ");
+                int habilidade = lerEntradaInteiro("Digite a habilidade do monstro: ");
+                int energia = lerEntradaInteiro("Digite a energia do monstro: ");
+
+                Monstro monstro = new Monstro(nome, habilidade, energia);
+                ArrayList<Monstro> monstros = new ArrayList<>();
+                monstros.add(monstro);
+                Batalha batalha = new Batalha(personagem, monstros);
+                batalha.iniciar();
+            } catch (Exception e) {
+                System.out.println("Erro ao iniciar batalha: " + e.getMessage());
+            }
         }
+    }
+
+    private static void guardarNaMochilaDiretamente() {
+        if (verificarPersonagem()) {
+            String nomeItem = lerEntrada("Digite o nome do item a ser guardado na mochila: ");
+            String tipo = lerEntrada("Digite o tipo do item a ser guardado na mochila: ");
+            int valor = lerEntradaInteiro("Digite o poder do item a ser guardado na mochila: ");
+            String local = lerEntrada("Digite o local onde o item deve ser equipado no personagem: ");
+            personagem.getInventario().adicionarNaMochila(nomeItem, tipo, valor, local);
+            System.out.println("Item " + nomeItem + " foi guardado diretamente na mochila.");
+        }
+    }
+
+    public static void diminuirDosePocao() {
+        if (verificarPersonagem()) {
+            String tipo = lerEntrada("Digite o tipo da poção (habilidade, vigor, fortuna): ").trim().toLowerCase();
+            Pocao pocao = personagem.getInventario().getPocao(tipo);
+            if (pocao != null) {
+                if (pocao.diminuirDose()) {
+                    System.out.println("A poção de " + tipo + " acabou!");
+                } else {
+                    System.out.println("Dose diminuída! Restam " + pocao.getDoses() + " dose(s).");
+                }
+            } else {
+                System.out.println("Você não possui uma poção de " + tipo + ".");
+            }
+        }
+    }
+
+    public static void exibirEstatisticas() {
+        if (verificarPersonagem()) personagem.exibirEstatisticas();
+    }
+
+    private static void listarEquipamentos() {
+        if (verificarPersonagem()) personagem.listarEquipamentos();
     }
 
     private static void listarItens() {
@@ -146,65 +210,28 @@ public class Menu implements Serializable {
     }
 
     private static void ganharProvisao() {
-        if (verificarPersonagem()) {
-            personagem.ganharProvisao();
-        }
+        if (verificarPersonagem()) personagem.ganharProvisao();
     }
 
     private static void comerProvisao() {
-        if (verificarPersonagem()) {
-            personagem.comer();
-        }
+        if (verificarPersonagem()) personagem.comer();
     }
 
-    private static void usarPocao() {
-        if (verificarPersonagem()) {
-            String tipo = lerEntrada("Digite o tipo da poção (habilidade, vigor, fortuna): ").trim().toLowerCase();
-            if (!tipo.equals("habilidade") && !tipo.equals("vigor") && !tipo.equals("fortuna")) {
-                System.out.println("Tipo de poção inválido!");
-                return;
-            }
-            Pocao pocao = personagem.getInventario().getPocao(tipo);
-            if (pocao != null) {
-                pocao.usarPocao(personagem);
-            } else {
-                System.out.println("Você não possui uma poção de " + tipo + ".");
-            }
-        }
-    }
-
-    private static void iniciarBatalha() {
-        if (verificarPersonagem()) {
-            try {
-                String nome = lerEntrada("Digite o nome do monstro: ");
-                int habilidade = lerEntradaInteiro("Digite a habilidade do monstro: ");
-                int energia = lerEntradaInteiro("Digite a energia do monstro: ");
-
-                Monstro monstro = new Monstro(nome, habilidade, energia);
-                List<Monstro> monstros = new ArrayList<>();
-                monstros.add(monstro);
-                Batalha batalha = new Batalha(personagem, monstros);
-                batalha.iniciar();
-            } catch (Exception e) {
-                System.out.println("Erro ao iniciar batalha: " + e.getMessage());
-            }
-        }
-    }
-
-    private static void salvarPersonagem() {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("personagem.dat"))) {
-            out.writeObject(personagem);
+    public static void salvarPersonagem() {
+        try (Writer writer = new FileWriter("personagem.json")) {
+            gson.toJson(personagem, writer);
             System.out.println("Personagem salvo com sucesso!");
         } catch (IOException e) {
             System.out.println("Erro ao salvar personagem: " + e.getMessage());
         }
     }
 
-    private static void carregarPersonagem() {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("personagem.dat"))) {
-            personagem = (Personagem) in.readObject();
+    public static void carregarPersonagem() {
+        String nomeArquivo = lerEntrada("Digite o nome do arquivo para carregar: ").trim();
+        try (Reader reader = new FileReader(nomeArquivo)) {
+            personagem = gson.fromJson(reader, Personagem.class);
             System.out.println("Personagem carregado com sucesso!");
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             System.out.println("Erro ao carregar personagem: " + e.getMessage());
         }
     }
@@ -217,7 +244,7 @@ public class Menu implements Serializable {
         return true;
     }
 
-    private static int lerEntradaInteiro(String mensagem) {
+    static int lerEntradaInteiro(String mensagem) {
         while (true) {
             try {
                 return Integer.parseInt(lerEntrada(mensagem));

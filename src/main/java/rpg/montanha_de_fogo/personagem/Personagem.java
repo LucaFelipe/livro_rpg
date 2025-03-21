@@ -1,7 +1,6 @@
 package rpg.montanha_de_fogo.personagem;
 
 import rpg.montanha_de_fogo.inventario.Inventario;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
@@ -87,6 +86,8 @@ public class Personagem implements Serializable {
             return;
         }
 
+        int poderItem = inventario.obterPoderItem(nomeItem);
+
         if (tipo.equals("arma")) {
             if (armaEquipada != null) {
                 System.out.println("Você já tem uma arma equipada! Deseja substituir " + armaEquipada + "? (s/n)");
@@ -94,6 +95,7 @@ public class Personagem implements Serializable {
                 guardarNaMochila(armaEquipada);
             }
             armaEquipada = nomeItem;
+            habilidade += poderItem;
         } else if (tipo.equals("armadura")) {
             if (armaduraEquipada != null) {
                 System.out.println("Você já tem uma armadura equipada! Deseja substituir " + armaduraEquipada + "? (s/n)");
@@ -101,6 +103,7 @@ public class Personagem implements Serializable {
                 guardarNaMochila(armaduraEquipada);
             }
             armaduraEquipada = nomeItem;
+            energia += poderItem;
         } else {
             System.out.println("Tipo de equipamento inválido.");
             return;
@@ -112,20 +115,29 @@ public class Personagem implements Serializable {
 
     public void guardarNaMochila(String nomeItem) {
         if (nomeItem.equals(armaEquipada)) {
+            habilidade -= inventario.obterPoderItem(nomeItem);
             armaEquipada = null;
         } else if (nomeItem.equals(armaduraEquipada)) {
+            energia -= inventario.obterPoderItem(nomeItem);
             armaduraEquipada = null;
         } else {
             System.out.println("Esse item não está equipado!");
             return;
         }
+
         inventario.adicionarNaMochila(nomeItem, "equipamento", 0, "mochila");
-        System.out.println(nomeItem + " guardado na mochila.");
+        System.out.println(nomeItem + " guardado na mochila e seu efeito foi removido.");
+    }
+    public void guardarItemDiretoNaMochila(String nomeItem, String tipo, int poder) {
+        if (inventario.temNaMochila(nomeItem)) {
+            System.out.println("O item " + nomeItem + " já está na mochila!");
+            return;
+        }
+
+        inventario.adicionarNaMochila(nomeItem, tipo, poder, "mochila");
+        System.out.println(nomeItem + " foi guardado diretamente na mochila.");
     }
 
-    public void usarPocao(String tipo) {
-        inventario.usarPocao(tipo, this);
-    }
 
     private boolean confirmarAcao() {
         Scanner scanner = new Scanner(System.in);
@@ -149,20 +161,26 @@ public class Personagem implements Serializable {
         return energia > 0;
     }
 
-    public int atacar(boolean usarSorte) {
-        int ataque = habilidade + (rand.nextInt(6) + 1) + (rand.nextInt(6) + 1);
-        if (usarSorte && testarSorte()) {
-            ataque += 2;
-        }
-        System.out.println(nome + " ataca com " + ataque + " de força!");
-        return ataque;
-    }
-
     public boolean testarSorte() {
         int resultado = (rand.nextInt(6) + 1) + (rand.nextInt(6) + 1);
         boolean sucesso = resultado <= sorte;
         reduzirSorte();
         return sucesso;
+    }
+
+    public int[] atacar(boolean usarSorte) {
+        int rolagemAtaque = rand.nextInt(6) + 1 + rand.nextInt(6) + 1 + habilidade;
+        int danoBase = 2;
+
+        if (usarSorte && testarSorte()) {
+            danoBase += 2; // Dano aumentado ao ter sorte no ataque
+            System.out.println(nome + " usou sorte no ataque e causou mais dano!");
+        } else if (usarSorte) {
+            danoBase -= 1; // Dano reduzido ao falhar no teste de sorte
+            System.out.println(nome + " falhou no teste de sorte e causou menos dano.");
+        }
+
+        return new int[]{rolagemAtaque, danoBase};
     }
 
     public void reduzirSorte() {
@@ -172,5 +190,21 @@ public class Personagem implements Serializable {
     public void receberDano(int danoRecebido) {
         energia = Math.max(0, energia - danoRecebido);
         System.out.println(nome + " recebeu " + danoRecebido + " de dano. Energia restante: " + energia);
+    }
+
+    public int getDano() {
+        return 2;
+    }
+
+    public void defender(int danoMonstro, boolean usarSorteDefesa) {
+        if (usarSorteDefesa){
+            if (testarSorte()){
+                receberDano(danoMonstro - 1);
+            }else {
+                receberDano(danoMonstro + 1);
+            }
+        }else {
+            receberDano(danoMonstro);
+        }
     }
 }
