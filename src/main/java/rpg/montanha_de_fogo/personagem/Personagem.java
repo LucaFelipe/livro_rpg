@@ -9,19 +9,44 @@ import java.util.Scanner;
 public class Personagem implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-
     private final String nome;
     private int habilidade;
-    private final int habilidadeMaxima;
+    private int habilidadeMaxima;
     private int energia;
-    private final int energiaMaxima;
+    private int energiaMaxima;
     private int sorte;
-    private final int sorteMaxima;
+    private int sorteMaxima;
     private int provisoes;
-    private final Inventario inventario;
+    private Inventario inventario;
     private String armaEquipada = null;
     private String armaduraEquipada = null;
     private static final Random rand = new Random();
+
+    public void setInventario(Inventario inventario) {
+        this.inventario = inventario;
+    }
+    public int getHabilidadeMaxima() {
+        return habilidadeMaxima;
+    }
+
+    public void setHabilidadeMaxima(int habilidadeMaxima) {
+        this.habilidadeMaxima = habilidadeMaxima;
+    }
+
+    public int getSorteMaxima() {
+        return sorteMaxima;
+    }
+
+    public void setSorteMaxima(int sorteMaxima) {
+        this.sorteMaxima = sorteMaxima;
+    }
+    public int getEnergiaMaxima() {
+        return energiaMaxima;
+    }
+
+    public void setEnergiaMaxima(int energiaMaxima) {
+        this.energiaMaxima = energiaMaxima;
+    }
 
     public Personagem(String nome) {
         this.nome = nome;
@@ -31,6 +56,45 @@ public class Personagem implements Serializable {
         this.provisoes = 10;
         this.inventario = new Inventario();
     }
+
+    public int getSorte() {
+        return sorte;
+    }
+
+    public void setSorte(int sorte) {
+        this.sorte = sorte;
+    }
+
+    public int getHabilidade() {
+        return habilidade;
+    }
+
+    public void setHabilidade(int habilidade) {
+        this.habilidade = habilidade;
+    }
+
+    public int getEnergia() {
+        return energia;
+    }
+    public void setEnergia(int energia) {
+        this.energia = energia;
+    }
+
+    public String getArmaEquipada() {
+        return armaEquipada;
+    }
+
+    public void setArmaEquipada(String armaEquipada) {
+        this.armaEquipada = armaEquipada;
+    }
+    public String getArmaduraEquipada() {
+        return armaduraEquipada;
+    }
+
+    public void setArmaduraEquipada(String armaduraEquipada) {
+        this.armaduraEquipada = armaduraEquipada;
+    }
+
 
     public String getNome() {
         return nome;
