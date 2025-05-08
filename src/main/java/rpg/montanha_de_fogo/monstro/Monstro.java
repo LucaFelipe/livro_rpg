@@ -24,7 +24,6 @@ public class Monstro implements Serializable {
         this.energia = energia;
     }
 
-    // Método para o ataque do monstro
     public int[] atacar() {
         Random rand = new Random();
         int dados = (rand.nextInt(6) + 1) + (rand.nextInt(6) + 1);
@@ -33,7 +32,6 @@ public class Monstro implements Serializable {
         return new int[]{ataque, DANO_FIXO};
     }
 
-    // Método de defesa, reduz a energia do monstro conforme o dano
     public void defender(int dano) {
         energia -= dano;
         System.out.println(nome + " recebeu " + dano + " de dano! Energia restante: " + energia);
@@ -41,7 +39,7 @@ public class Monstro implements Serializable {
 
     // Verifica se o monstro ainda está vivo
     public boolean estaVivo() {
-        return energia <= 0;
+        return energia > 0;
     }
 
     // Exibe as estatísticas do monstro

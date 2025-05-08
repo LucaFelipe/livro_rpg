@@ -17,44 +17,59 @@ public class Batalha {
     }
 
     public void iniciar() {
-        while (personagem.estaVivo() && monstros.get(0).estaVivo()) {
-            exibirEstatisticas();
+        while (personagem.estaVivo() && haMonstrosVivos()) {
+            System.out.println("\nMonstros disponíveis para combate:");
+            for (int i = 0; i < monstros.size(); i++) {
+                Monstro m = monstros.get(i);
+                if (m.estaVivo()) {
+                    System.out.println((i + 1) + " - " + m.getNome() + " (Vida: " + m.getEnergia() + ")");
+                }
+            }
 
-            String acao = escolherAcao();
-            if (acao.equals("fugir")) {
+            System.out.println("Digite o número do monstro que deseja atacar ou 'fugir':");
+            String acao = scanner.nextLine();
+
+            if (acao.equalsIgnoreCase("fugir")) {
                 fugir();
                 if (!personagem.estaVivo()) {
                     System.out.println(personagem.getNome() + " foi derrotado ao tentar fugir!");
                 }
-                break;
+                return;
             }
 
-            realizarAtaque();
-            if (!personagem.estaVivo() || !monstros.get(0).estaVivo()) {
-                break;
+            try {
+                int indice = Integer.parseInt(acao) - 1;
+                if (indice >= 0 && indice < monstros.size() && monstros.get(indice).estaVivo()) {
+                    Monstro monstroEscolhido = monstros.get(indice);
+                    exibirEstatisticas();
+                    realizarAtaque(monstroEscolhido);
+                    verificarDerrota(monstroEscolhido);
+                } else {
+                    System.out.println("Número inválido ou monstro já foi derrotado.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Digite o número do monstro ou 'fugir'.");
             }
         }
+
+        if (personagem.estaVivo()) {
+            System.out.println("Parabéns! Todos os monstros foram derrotados.");
+        }
+    }
+
+    protected boolean haMonstrosVivos() {
+        for (Monstro monstro : monstros) {
+            if (monstro.estaVivo()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void exibirEstatisticas() {
         personagem.exibirEstatisticas();
-        monstros.get(0).exibirEstatisticas();
-    }
-
-    private String escolherAcao() {
-        return obterEntrada(new String[]{"atacar", "fugir"});
-    }
-
-    private String obterEntrada(String[] opcoes) {
-        while (true) {
-            System.out.print("Escolha uma ação (atacar/fugir): ");
-            String entrada = scanner.nextLine().trim().toLowerCase();
-            for (String opcao : opcoes) {
-                if (entrada.equals(opcao)) {
-                    return entrada;
-                }
-            }
-            System.out.println("Ação inválida. Por favor, escolha entre " + String.join(", ", opcoes) + ".");
+        for (Monstro monstro : monstros) {
+            monstro.exibirEstatisticas();
         }
     }
 
@@ -63,50 +78,60 @@ public class Batalha {
         String resposta = scanner.nextLine().trim().toLowerCase();
         boolean usarSorteFuga = resposta.equals("sim");
 
+        int monstrosVivos = (int) monstros.stream().filter(Monstro::estaVivo).count();
+
         if (usarSorteFuga) {
-            if (personagem.testarSorte()){
-                System.out.println(personagem.getNome() + " fugiu com 1 de dano!");
+            boolean fugaBemSucedida = true;
+            for (int i = 0; i < monstrosVivos; i++) {
+                if (!personagem.testarSorte()) {
+                    fugaBemSucedida = false;
+                    break;
+                }
+            }
+
+            if (fugaBemSucedida) {
                 personagem.receberDano(1);
+                System.out.println(personagem.getNome() + " fugiu com sucesso de todos os monstros, sofrendo apenas 1 de dano!");
             } else {
                 personagem.receberDano(3);
-                System.out.println(personagem.getNome() + " fugiu com 3 de dano!");
+                System.out.println(personagem.getNome() + " não conseguiu escapar de todos os monstros e sofreu 3 de dano!");
             }
+
         } else {
-            System.out.println(personagem.getNome() + " fugiu com 2 de dano!");
             personagem.receberDano(2);
+            System.out.println(personagem.getNome() + " fugiu sem usar a sorte e sofreu 2 de dano!");
         }
     }
 
-    private void realizarAtaque() {
+    private void realizarAtaque(Monstro monstroEscolhido) {
         System.out.print("Deseja usar a sorte no ataque? (sim/nao): ");
         boolean usarSorteAtaque = scanner.nextLine().trim().equalsIgnoreCase("sim");
         int[] ataquePersonagem = personagem.atacar(usarSorteAtaque);
+        int[] ataqueMonstro = monstroEscolhido.atacar();
 
-        for (Monstro monstro : monstros) {
-            int[] ataqueMonstro = monstro.atacar();
+        // Exibir forças
+        System.out.println(personagem.getNome() + " (Força do ataque: " + ataquePersonagem[0] + ")");
+        System.out.println(monstroEscolhido.getNome() + " (Força do ataque: " + ataqueMonstro[0] + ")");
 
-            if (ataquePersonagem[0] > ataqueMonstro[0]) {
-                int danoPersonagem = personagem.getDano();
-                monstro.receberDano(danoPersonagem);
-                System.out.println(personagem.getNome() + " ataca e causa " + danoPersonagem + " de dano ao " + monstro.getNome() + ". Energia restante: " + monstro.getEnergia());
-            } else if (ataqueMonstro[0] > ataquePersonagem[0]) {
-                System.out.print("Deseja usar a sorte para se defender? (sim/nao): ");
-                boolean usarSorteDefesa = scanner.nextLine().trim().equalsIgnoreCase("sim");
-                int danoMonstro = monstro.getDano();
-                personagem.defender(danoMonstro, usarSorteDefesa);
-            } else {
-                System.out.println("O ataque de " + monstro.getNome() + " e " + personagem.getNome() + " foram iguais. Ninguém sofre dano nesta rodada.");
-            }
+        if (ataquePersonagem[0] > ataqueMonstro[0]) {
+            int danoPersonagem = personagem.getDano();
+            monstroEscolhido.receberDano(danoPersonagem);
+            System.out.println(personagem.getNome() + " ataca e causa " + danoPersonagem + " de dano ao " + monstroEscolhido.getNome() + ". Energia restante: " + monstroEscolhido.getEnergia());
+        } else if (ataqueMonstro[0] > ataquePersonagem[0]) {
+            System.out.print("Deseja usar a sorte para se defender? (sim/nao): ");
+            boolean usarSorteDefesa = scanner.nextLine().trim().equalsIgnoreCase("sim");
+            int danoMonstro = monstroEscolhido.getDano();
+            personagem.defender(danoMonstro, usarSorteDefesa);
+        } else {
+            System.out.println("O ataque de " + monstroEscolhido.getNome() + " e " + personagem.getNome() + " foram iguais. Ninguém sofre dano nesta rodada.");
         }
-
-        verificarDerrota();
     }
 
-    private void verificarDerrota() {
+    protected void verificarDerrota(Monstro monstro) {
         if (!personagem.estaVivo()) {
             System.out.println(personagem.getNome() + " foi derrotado!");
-        } else if (!monstros.get(0).estaVivo()) {
-            System.out.println("O monstro foi derrotado!");
+        } else if (!monstro.estaVivo()) {
+            System.out.println(monstro.getNome() + " foi derrotado!");
         }
     }
 }

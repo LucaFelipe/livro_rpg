@@ -192,6 +192,7 @@ public class Personagem implements Serializable {
         inventario.adicionarNaMochila(nomeItem, "equipamento", 0, "mochila");
         System.out.println(nomeItem + " guardado na mochila e seu efeito foi removido.");
     }
+
     public void guardarItemDiretoNaMochila(String nomeItem, String tipo, int poder) {
         if (inventario.temNaMochila(nomeItem)) {
             System.out.println("O item " + nomeItem + " já está na mochila!");

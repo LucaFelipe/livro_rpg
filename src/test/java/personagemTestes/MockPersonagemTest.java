@@ -1,4 +1,4 @@
-package TestesMock;
+package personagemTestes;
 
 import rpg.montanha_de_fogo.personagem.Personagem;
 import org.junit.jupiter.api.Assertions;

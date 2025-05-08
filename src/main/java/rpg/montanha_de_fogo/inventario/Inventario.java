@@ -10,7 +10,7 @@ public class Inventario implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final Map<String, Item> mochila = new HashMap<>();
-    private final Map<String, Pocao> pocoes = new HashMap<>();
+    protected final Map<String, Pocao> pocoes = new HashMap<>();
 
     public void adicionarNaMochila(String nome, String tipo, int poder, String local) {
         mochila.put(nome, new Item(nome, tipo, poder, local));
@@ -37,9 +37,9 @@ public class Inventario implements Serializable {
         return mochila.getOrDefault(nome, new Item("", "", 0, "")).poder();
     }
 
-    public void adicionarPocao(String tipo) {
-        pocoes.computeIfAbsent(tipo, Pocao::new).aumentarDose();
-        System.out.println("Poção de " + tipo + " adicionada ao inventário.");
+    public void adicionarPocao(Pocao pocao) {
+        pocoes.put(pocao.getTipo(), pocao);
+        System.out.println("Poção de " + pocao.getTipo() + " foi adicionada ao inventário.");
     }
 
     public void listarMochila() {

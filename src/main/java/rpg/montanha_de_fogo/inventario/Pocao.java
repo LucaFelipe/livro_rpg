@@ -11,9 +11,9 @@ public class Pocao implements Serializable {
     private final String tipo;
     private int dose;
 
-    public Pocao(String tipo) {
+    public Pocao(String tipo, int dose) {
         this.tipo = tipo;
-        this.dose = 2;
+        this.dose = dose;
     }
 
     @Override
@@ -22,14 +22,15 @@ public class Pocao implements Serializable {
     }
 
     public void aplicarEfeito(Personagem personagem) {
+        System.out.println("1 - habilidade\n2 - energia\n3 - sorte\n\nDigite o tipo de efeito que deseja aplicar:");
         switch (tipo) {
-            case "habilidade":
+            case "1":
                 personagem.restaurarHabilidade();
                 break;
-            case "vigor":
+            case "2":
                 personagem.restaurarEnergia();
                 break;
-            case "fortuna":
+            case "3":
                 personagem.aumentarSorte();
                 break;
             default:
@@ -42,7 +43,7 @@ public class Pocao implements Serializable {
     public void usarPocao(Personagem personagem) {
         if (dose > 0) {
             aplicarEfeito(personagem);
-            dose--;
+            diminuirDose();
             System.out.println("Restam " + dose + " dose(s) de poção de " + tipo + ".");
             return;
         }
@@ -62,5 +63,9 @@ public class Pocao implements Serializable {
             this.dose--;
         }
         return dose == 0;
+    }
+
+    public String getTipo() {
+        return tipo;
     }
 }

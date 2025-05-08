@@ -6,7 +6,6 @@ import rpg.montanha_de_fogo.batalha.Batalha;
 import rpg.montanha_de_fogo.personagem.Personagem;
 import rpg.montanha_de_fogo.monstro.Monstro;
 import rpg.montanha_de_fogo.inventario.Pocao;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -47,6 +46,7 @@ public class Menu implements Serializable {
         System.out.println("13. Carregar o personagem");
         System.out.println("14. Diminuir dose da poção");
         System.out.println("15. Sair");
+        System.out.println("");
     }
 
     private static String lerEntrada(String mensagem) {
@@ -95,23 +95,23 @@ public class Menu implements Serializable {
             System.out.println("Escolha uma poção inicial para o seu personagem:");
             System.out.println("1. Poção de Habilidade");
             System.out.println("2. Poção de Energia");
-            System.out.println("3. Poção de Sorte");
+            System.out.println("3. Poção de Fortuna");
 
             String escolha = lerEntrada("Escolha (1, 2 ou 3): ").trim();
             Pocao pocaoEscolhida = criarPocaoEscolhida(escolha);
 
             if (pocaoEscolhida != null) {
-                personagem.getInventario().adicionarPocao(pocaoEscolhida.toString());
-                System.out.println("Poção de " + pocaoEscolhida + " foi adicionada ao inventário.");
+                personagem.getInventario().adicionarPocao(pocaoEscolhida);
+                System.out.println("Poção de " + pocaoEscolhida.getTipo() + " foi adicionada ao inventário.");
             }
         }
     }
 
     static Pocao criarPocaoEscolhida(String escolha) {
         return switch (escolha) {
-            case "1" -> new Pocao("habilidade");
-            case "2" -> new Pocao("energia");
-            case "3" -> new Pocao("sorte");
+            case "1" -> new Pocao("habilidade", 2);
+            case "2" -> new Pocao("energia", 2);
+            case "3" -> new Pocao("fortuna", 2);
             default -> {
                 System.out.println("Opção inválida. Nenhuma poção foi adicionada.");
                 yield null;
@@ -121,8 +121,8 @@ public class Menu implements Serializable {
 
     public static void usarPocao() {
         if (verificarPersonagem()) {
-            String tipo = lerEntrada("Digite o tipo da poção (habilidade, vigor, fortuna): ").trim().toLowerCase();
-            if (!tipo.equals("habilidade") && !tipo.equals("vigor") && !tipo.equals("fortuna")) {
+            String tipo = lerEntrada("Digite o tipo da poção (habilidade, energia, fortuna): ").trim().toLowerCase();
+            if (!tipo.equals("habilidade") && !tipo.equals("energia") && !tipo.equals("fortuna")) {
                 System.out.println("Tipo de poção inválido!");
                 return;
             }
@@ -166,7 +166,7 @@ public class Menu implements Serializable {
 
     public static void diminuirDosePocao() {
         if (verificarPersonagem()) {
-            String tipo = lerEntrada("Digite o tipo da poção (habilidade, vigor, fortuna): ").trim().toLowerCase();
+            String tipo = lerEntrada("Digite o tipo da poção (habilidade, energia, fortuna): ").trim().toLowerCase();
             Pocao pocao = personagem.getInventario().getPocao(tipo);
             if (pocao != null) {
                 if (pocao.diminuirDose()) {
@@ -218,9 +218,13 @@ public class Menu implements Serializable {
     }
 
     public static void salvarPersonagem() {
-        try (Writer writer = new FileWriter("personagem.json")) {
+        String nomeArquivo = lerEntrada("Digite o nome do arquivo para salvar (ou deixe em branco para 'personagem.json'): ").trim();
+        if (nomeArquivo.isEmpty()) {
+            nomeArquivo = "personagem.json";
+        }
+        try (Writer writer = new FileWriter(nomeArquivo)) {
             gson.toJson(personagem, writer);
-            System.out.println("Personagem salvo com sucesso!");
+            System.out.println("Personagem salvo em " + nomeArquivo + " com sucesso!");
         } catch (IOException e) {
             System.out.println("Erro ao salvar personagem: " + e.getMessage());
         }
