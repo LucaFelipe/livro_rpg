@@ -54,14 +54,30 @@
 
     <build>
         <plugins>
-            <!-- Configuração do Maven Surefire Plugin para desabilitar o CDS -->
+            <!-- Plugin para empacotar dependências no JAR -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version> <!-- Use a versão mais recente -->
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
-                    <argLine>-Xshare:off</argLine> <!-- Desabilita o CDS -->
+                    <archive>
+                        <manifest>
+                            <mainClass>rpg.montanha_de_fogo.Main</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
