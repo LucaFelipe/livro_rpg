@@ -1,5 +1,7 @@
 package rpg.montanha_de_fogo.inventario;
 
+import javafx.scene.control.TextArea;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -42,25 +44,18 @@ public class Inventario implements Serializable {
         System.out.println("Poção de " + pocao.getTipo() + " foi adicionada ao inventário.");
     }
 
-    public void listarMochila() {
-        System.out.println("\nItens na mochila:");
-        if (mochila.isEmpty()) {
-            System.out.println("A mochila está vazia.");
-        } else {
-            mochila.values().forEach(item ->
-                    System.out.println(item.nome() + " (Poder: " + item.poder() + ")")
-            );
+    public void listarMochila(TextArea output) {
+        output.appendText("Mochila:\n");
+        for (Item i : mochila.values()) {
+            output.appendText(i.toString() + "\n");
         }
     }
 
-    public void listarPocoes() {
-        System.out.println("\nPoções no inventário:");
-        if (pocoes.isEmpty()) {
-            System.out.println("Não há poções no inventário.");
-        } else {
-            pocoes.forEach((tipo, pocao) ->
-                    System.out.println("Poção de " + tipo + " (Doses: " + pocao.getDoses() + ")")
-            );
+
+    public void listarPocoes(TextArea output) {
+        output.appendText("Poções:\n");
+        for (Pocao p : pocoes.values()) {
+            output.appendText(p.toString() + "\n");
         }
     }
 

@@ -1,0 +1,16 @@
+.root {
+    -fx-background-color: #001f3f; /* Azul escuro */
+    -fx-text-fill: white;           /* Texto branco geral */
+    -fx-font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.text-area {
+    -fx-control-inner-background: #001f3f; /* Fundo azul escuro do TextArea */
+    -fx-text-fill: white;                   /* Texto branco no TextArea */
+}
+
+.button {
+    -fx-background-color: black; /* Botões pretos */
+    -fx-text-fill: white;         /* Texto branco */
+    -fx-font-weight: bold;
+}

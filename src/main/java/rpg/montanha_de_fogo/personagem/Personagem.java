@@ -1,5 +1,6 @@
 package rpg.montanha_de_fogo.personagem;
 
+import javafx.scene.control.TextArea;
 import rpg.montanha_de_fogo.inventario.Inventario;
 import java.io.Serial;
 import java.io.Serializable;
@@ -104,18 +105,17 @@ public class Personagem implements Serializable {
         return inventario;
     }
 
-    public void exibirEstatisticas() {
-        System.out.println("\nNome: " + nome +
-                "\nHabilidade: " + habilidade + "/" + habilidadeMaxima +
-                "\nEnergia: " + energia + "/" + energiaMaxima +
-                "\nSorte: " + sorte + "/" + sorteMaxima +
-                "\nProvisões: " + provisoes);
-        listarEquipamentos();
-        inventario.listarMochila();
-        inventario.listarPocoes();
+    public void exibirEstatisticas(TextArea output) {
+        output.appendText("Nome: " + nome + "\n");
+        output.appendText("Habilidade: " + habilidade + "/" + habilidadeMaxima + "\n");
+        output.appendText("Energia: " + energia + "/" + energiaMaxima + "\n");
+        output.appendText("Sorte: " + sorte + "/" + sorteMaxima + "\n");
+        listarEquipamentos(output);
+        inventario.listarMochila(output);
+        inventario.listarPocoes(output);
     }
 
-    public void listarEquipamentos() {
+    public void listarEquipamentos(TextArea outputArea) {
         System.out.println("Equipamentos Equipados:");
         System.out.println("Arma: " + (armaEquipada != null ? armaEquipada : "Nenhuma"));
         System.out.println("Armadura: " + (armaduraEquipada != null ? armaduraEquipada : "Nenhuma"));
