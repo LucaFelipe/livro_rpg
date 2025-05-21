@@ -12,23 +12,36 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javafx.version>21</javafx.version> <!-- Use a versão que você tem instalada -->
     </properties>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <!-- GSON -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.12.1</version>
         </dependency>
-        <!-- JUnit 5 (Jupiter) -->
+
+        <!-- JavaFX -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
+        <!-- JUnit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.9.2</version> <!-- Atualize para uma versão recente -->
+            <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -36,14 +49,13 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Mockito para testes unitários -->
+        <!-- Mockito -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>5.8.0</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
@@ -54,7 +66,27 @@
 
     <build>
         <plugins>
-            <!-- Plugin para empacotar dependências no JAR -->
+            <!-- Maven Compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <release>17</release>
+                </configuration>
+            </plugin>
+
+            <!-- JavaFX Plugin (execução do app com javafx:run) -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>rpg.montanha_de_fogo.menu.MenuApp</mainClass>
+                </configuration>
+            </plugin>
+
+            <!-- Criação de JAR com dependências -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -62,7 +94,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>rpg.montanha_de_fogo.Main</mainClass>
+                            <mainClass>rpg.montanha_de_fogo.menu.MenuApp</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
